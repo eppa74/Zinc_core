@@ -1,4 +1,4 @@
-name: eppa
+name: eppa74
 
 on: [push, pull_request]
 
