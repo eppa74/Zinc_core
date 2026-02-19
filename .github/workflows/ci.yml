@@ -1,4 +1,4 @@
-name: eppa74
+name: CI
 
 on: [push, pull_request]
 
@@ -6,35 +6,60 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
+        compiler: [gcc, clang, msvc]
+        exclude:
           - os: ubuntu-latest
-            compiler: gcc
-          - os: ubuntu-latest
-            compiler: clang
-          - os: windows-latest
             compiler: msvc
           - os: macos-latest
+            compiler: msvc
+          - os: macos-latest
+            compiler: gcc
+          - os: windows-latest
+            compiler: gcc
+          - os: windows-latest
             compiler: clang
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Configure (GCC)
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup MSVC
+      if: matrix.os == 'windows-latest'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Configure GCC
       if: matrix.compiler == 'gcc'
-      run: cmake -B build -DZINC_BUILD_TESTS=ON -DZINC_BUILD_EXAMPLES=ON -DCMAKE_CXX_COMPILER=g++
-    
-    - name: Configure (Clang)
+      run: |
+        cmake -B build \
+          -DZINC_BUILD_TESTS=ON \
+          -DZINC_BUILD_EXAMPLES=ON \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_CXX_STANDARD=17 \
+          -DCMAKE_BUILD_TYPE=Release
+
+    - name: Configure Clang
       if: matrix.compiler == 'clang'
-      run: cmake -B build -DZINC_BUILD_TESTS=ON -DZINC_BUILD_EXAMPLES=ON -DCMAKE_CXX_COMPILER=clang++
-    
-    - name: Configure (MSVC)
+      run: |
+        cmake -B build \
+          -DZINC_BUILD_TESTS=ON \
+          -DZINC_BUILD_EXAMPLES=ON \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_CXX_STANDARD=17 \
+          -DCMAKE_BUILD_TYPE=Release
+
+    - name: Configure MSVC
       if: matrix.compiler == 'msvc'
-      run: cmake -B build -DZINC_BUILD_TESTS=ON -DZINC_BUILD_EXAMPLES=ON
-      
+      run: |
+        cmake -B build `
+          -DZINC_BUILD_TESTS=ON `
+          -DZINC_BUILD_EXAMPLES=ON `
+          -DCMAKE_CXX_STANDARD=17
+
     - name: Build
-      run: cmake --build build --config Release
-      
+      run: cmake --build build --config Release --parallel
+
     - name: Test
-      run: ctest --test-dir build -C Release --output-on-failure
+      run: ctest --test-dir build -C Release --output-on-failure --parallel
