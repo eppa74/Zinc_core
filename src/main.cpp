@@ -1,4 +1,4 @@
-#include "include/zinc.h"
+#include "zinc.h"
 
 MAIN {
     println("Hello World");
