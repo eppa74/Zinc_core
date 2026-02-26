@@ -13,22 +13,24 @@ A modern, single-header, cross-platform C++17 core library.
 - **Cross-Platform**: Windows, Linux, macOS, Android, iOS
 - **Zero Dependencies**: Only standard library
 - **Modern C++17**: Fold expressions, `if constexpr`, structured bindings
+- **Simplified Syntax**: No `std::` prefix needed – just use `println`, `vec`, `str`, etc.
+- **Rich Utilities**: String manipulation, file I/O, time, random, threading, and more
 
 ## Quick Start
 
 ```cpp
 #include "zinc.h"
 
-YU_MAIN {
-    Args args(argc, argv);
-    
-    println("Hello, {}!", "World");
-    
-    Path cwd_path = cwd();
-    println("Current: {}", cwd_path.string());
-    
-    Timer timer("Operation");
-    // ... code ...
-    
+// Simple main without arguments
+MAIN {
+    println("Hello, World!");
+
+    str cwd = current_dir();
+    println("Current directory: ", cwd);
+
+    Timer timer;
+    // ... your code ...
+    println("Elapsed: ", timer.elapsed_ms(), " ms");
+
     return 0;
 }
